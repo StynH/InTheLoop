@@ -37,6 +37,9 @@ public sealed record Review
     public required string Id { get; init; }
     public required string Title { get; init; }
     public string Source { get; init; } = "AI";
+
+    /// <summary>The project this review belongs to, or null when it is not in one.</summary>
+    public string? ProjectId { get; init; }
     public ReviewStatus Status { get; init; } = ReviewStatus.Pending;
     public DateTimeOffset CreatedAt { get; init; }
     public DateTimeOffset UpdatedAt { get; init; }

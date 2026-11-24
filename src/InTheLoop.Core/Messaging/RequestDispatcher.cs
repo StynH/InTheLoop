@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace InTheLoop.Core.Messaging;
 
-internal sealed class Dispatcher(IServiceProvider services) : IDispatcher
+internal sealed class RequestDispatcher(IServiceProvider services) : IRequestDispatcher
 {
     private static readonly ConcurrentDictionary<Type, object> Invokers = new();
 

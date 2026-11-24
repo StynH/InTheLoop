@@ -12,14 +12,26 @@ internal sealed class GetReviewHandler(IReviewStore store) : IRequestHandler<Get
         store.GetAsync(request.ReviewId.Trim(), cancellationToken);
 }
 
-public sealed record ListReviews(ReviewStatus? Status = null) : IRequest<IReadOnlyList<Review>>;
+public sealed record ListReviews(ReviewStatus? Status = null, string? Project = null) : IRequest<IReadOnlyList<Review>>;
 
-internal sealed class ListReviewsHandler(IReviewStore store) : IRequestHandler<ListReviews, IReadOnlyList<Review>>
+internal sealed class ListReviewsHandler(IReviewStore store, IProjectStore projects) : IRequestHandler<ListReviews, IReadOnlyList<Review>>
 {
     public async Task<IReadOnlyList<Review>> HandleAsync(ListReviews request, CancellationToken cancellationToken)
     {
-        var reviews = await store.ListAsync(cancellationToken);
-        return request.Status is { } status ? reviews.Where(r => r.Status == status).ToList() : reviews;
+        IEnumerable<Review> reviews = await store.ListAsync(cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(request.Project))
+        {
+            var project = await projects.RequireAsync(request.Project, cancellationToken);
+            reviews = reviews.Where(r => r.ProjectId == project.Id);
+        }
+
+        if (request.Status is { } status)
+        {
+            reviews = reviews.Where(r => r.Status == status);
+        }
+
+        return reviews.ToList();
     }
 }
 

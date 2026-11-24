@@ -17,8 +17,9 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(options);
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<IReviewStore, FileReviewStore>();
+        services.AddSingleton<IProjectStore, FileProjectStore>();
         services.AddSingleton<IAppPresence, AppPresence>();
-        services.AddSingleton<IDispatcher, Dispatcher>();
+        services.AddSingleton<IRequestDispatcher, RequestDispatcher>();
         services.AddRequestHandlers(typeof(ServiceCollectionExtensions).Assembly);
         return services;
     }

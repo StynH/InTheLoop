@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:InTheLoop.App.ViewModels"
+             xmlns:views="clr-namespace:InTheLoop.App.Views"
+             x:Class="InTheLoop.App.Views.MainPage"
+             x:DataType="vm:MainViewModel"
+             BackgroundColor="{StaticResource Canvas}">
+
+    <Grid ColumnDefinitions="72,*" ColumnSpacing="12" Padding="12">
+
+        <!-- Navigation rail -->
+        <Border Style="{StaticResource Panel}">
+            <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10" Padding="0,14">
+
+                <Border Background="{StaticResource AccentGradient}"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 14"
+                        WidthRequest="44"
+                        HeightRequest="44"
+                        HorizontalOptions="Center"
+                        Margin="0,0,0,10">
+                    <Label Text="&#xE73E;" Style="{StaticResource Glyph}" TextColor="White" FontSize="18" />
+                </Border>
+
+                <VerticalStackLayout Grid.Row="1" Spacing="8">
+                    <Button Text="&#xE8B9;"
+                            Command="{Binding ShowReviewsCommand}"
+                            AutomationId="NavReviews"
+                            ToolTipProperties.Text="Reviews">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsReviewsSection}" Value="True">
+                                <Setter Property="Style" Value="{StaticResource RailButtonActive}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsReviewsSection}" Value="False">
+                                <Setter Property="Style" Value="{StaticResource RailButton}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button Text="&#xE71B;"
+                            Command="{Binding ShowConnectCommand}"
+                            AutomationId="NavConnect"
+                            ToolTipProperties.Text="Connect an AI">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsConnectSection}" Value="True">
+                                <Setter Property="Style" Value="{StaticResource RailButtonActive}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsConnectSection}" Value="False">
+                                <Setter Property="Style" Value="{StaticResource RailButton}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </VerticalStackLayout>
+
+                <Button Grid.Row="3"
+                        Text="&#xE838;"
+                        Style="{StaticResource RailButton}"
+                        Command="{Binding OpenDataFolderCommand}"
+                        ToolTipProperties.Text="Open the folder where reviews are stored" />
+            </Grid>
+        </Border>
+
+        <!-- Reviews -->
+        <Grid Grid.Column="1"
+              ColumnDefinitions="330,*"
+              ColumnSpacing="12"
+              IsVisible="{Binding IsReviewsSection}">
+
+            <views:ReviewListView />
+
+            <Grid Grid.Column="1"
+                  ColumnDefinitions="*,370"
+                  ColumnSpacing="12"
+                  IsVisible="{Binding HasSelection}">
+                <views:ReviewStageView BindingContext="{Binding Detail}" />
+                <views:ConversationView Grid.Column="1" BindingContext="{Binding Detail}" />
+            </Grid>
+
+            <Border Grid.Column="1" Style="{StaticResource Panel}" IsVisible="{Binding HasNoSelection}">
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="14" MaximumWidthRequest="420">
+                    <Border BackgroundColor="{StaticResource AccentSoft}"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 24"
+                            WidthRequest="80"
+                            HeightRequest="80"
+                            HorizontalOptions="Center">
+                        <Label Text="&#xE8B9;" Style="{StaticResource Glyph}" TextColor="{StaticResource AccentText}" FontSize="32" />
+                    </Border>
+                    <Label Text="Nothing to review right now"
+                           Style="{StaticResource Title}"
+                           HorizontalTextAlignment="Center" />
+                    <Label Text="When your AI posts a screenshot it shows up here. You approve it or tell the AI what to change, and it gets your answer straight away."
+                           Style="{StaticResource Muted}"
+                           FontSize="14"
+                           HorizontalTextAlignment="Center" />
+                    <Button Text="Connect an AI"
+                            Style="{StaticResource PrimaryButton}"
+                            Command="{Binding ShowConnectCommand}"
+                            IsVisible="{Binding HasNoReviews}"
+                            HorizontalOptions="Center"
+                            Margin="0,6,0,0" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- Connect -->
+        <Grid Grid.Column="1" IsVisible="{Binding IsConnectSection}">
+            <views:ConnectView BindingContext="{Binding Connect}" />
+        </Grid>
+    </Grid>
+</ContentPage>

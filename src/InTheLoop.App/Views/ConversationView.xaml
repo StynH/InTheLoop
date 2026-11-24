@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:InTheLoop.App.ViewModels"
+             x:Class="InTheLoop.App.Views.ConversationView"
+             x:DataType="vm:ReviewDetailViewModel">
+
+    <Border Style="{StaticResource Panel}">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <VerticalStackLayout Padding="20,20,20,12" Spacing="2">
+                <Label Text="Conversation" Style="{StaticResource Heading}" />
+                <Label Text="{Binding Source, StringFormat='Between you and {0}'}" Style="{StaticResource Caption}" />
+            </VerticalStackLayout>
+
+            <ScrollView x:Name="TimelineScroll" Grid.Row="1" VerticalScrollBarVisibility="Default">
+                <VerticalStackLayout x:Name="TimelineStack"
+                                     Spacing="16"
+                                     Padding="16,4,16,16"
+                                     BindableLayout.ItemsSource="{Binding Timeline}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:EntryViewModel">
+                            <VerticalStackLayout Spacing="5" HorizontalOptions="Start" MaximumWidthRequest="290">
+                                <VerticalStackLayout.Triggers>
+                                    <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding IsHuman}" Value="True">
+                                        <Setter Property="HorizontalOptions" Value="End" />
+                                    </DataTrigger>
+                                </VerticalStackLayout.Triggers>
+
+                                <HorizontalStackLayout Spacing="6" HorizontalOptions="Start">
+                                    <HorizontalStackLayout.Triggers>
+                                        <DataTrigger TargetType="HorizontalStackLayout" Binding="{Binding IsHuman}" Value="True">
+                                            <Setter Property="HorizontalOptions" Value="End" />
+                                        </DataTrigger>
+                                    </HorizontalStackLayout.Triggers>
+                                    <Label Text="{Binding AuthorName}" FontSize="12" FontFamily="{StaticResource FontSemibold}" TextColor="{StaticResource TextMuted}" />
+                                    <Label Text="{Binding Time}" Style="{StaticResource Caption}" />
+                                </HorizontalStackLayout>
+
+                                <Label Text="{Binding Action}"
+                                       FontSize="12"
+                                       FontFamily="{StaticResource FontSemibold}"
+                                       TextColor="{Binding Kind, Converter={StaticResource EntryKindColor}}"
+                                       IsVisible="{Binding HasAction}"
+                                       HorizontalOptions="Start">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsHuman}" Value="True">
+                                            <Setter Property="HorizontalOptions" Value="End" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+
+                                <Border BackgroundColor="{StaticResource SurfaceRaised}"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 4,16,16,16"
+                                        Padding="12,9"
+                                        HorizontalOptions="Start"
+                                        IsVisible="{Binding HasText}">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsHuman}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="{StaticResource AccentSoft}" />
+                                            <Setter Property="StrokeShape" Value="RoundRectangle 16,4,16,16" />
+                                            <Setter Property="HorizontalOptions" Value="End" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Label Text="{Binding Text}" LineBreakMode="WordWrap" LineHeight="1.25" />
+                                </Border>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <!-- Verdict -->
+            <VerticalStackLayout Grid.Row="2" Padding="12" Spacing="10">
+                <Border Style="{StaticResource Card}" Stroke="{StaticResource Stroke}" StrokeThickness="1" Padding="14,10,8,8">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                        <Editor Text="{Binding FeedbackText}"
+                                Placeholder="Tell the AI what to change, or leave empty and approve"
+                                AutoSize="TextChanges"
+                                MinimumHeightRequest="64"
+                                MaximumHeightRequest="180"
+                                AutomationId="FeedbackEditor" />
+                        <Button Grid.Column="1"
+                                Text="&#xE724;"
+                                Style="{StaticResource IconButton}"
+                                Command="{Binding SendCommentCommand}"
+                                VerticalOptions="End"
+                                AutomationId="SendComment"
+                                ToolTipProperties.Text="Send as a comment, without a verdict" />
+                    </Grid>
+                </Border>
+
+                <Label Text="{Binding ErrorMessage}"
+                       TextColor="{StaticResource Danger}"
+                       FontSize="12"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource HasValue}}" />
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Button Text="Request changes"
+                            Style="{StaticResource WarningButton}"
+                            Command="{Binding RequestChangesCommand}"
+                            AutomationId="RequestChanges" />
+                    <Button Grid.Column="1"
+                            Text="Approve"
+                            Style="{StaticResource SuccessButton}"
+                            Command="{Binding ApproveCommand}"
+                            AutomationId="Approve" />
+                </Grid>
+            </VerticalStackLayout>
+        </Grid>
+    </Border>
+</ContentView>

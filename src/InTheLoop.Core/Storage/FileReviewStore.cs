@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using InTheLoop.Core.Messaging;
 using InTheLoop.Core.Models;
 
@@ -15,12 +14,7 @@ public sealed class FileReviewStore : IReviewStore, IDisposable
     private const string ReviewFile = "review.json";
     private const string LockFile = ".lock";
 
-    private static readonly JsonSerializerOptions Json = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-    };
+    private static readonly JsonSerializerOptions Json = StoreJson.Options;
 
     private readonly StoreOptions _options;
     private readonly FileSystemWatcher _watcher;

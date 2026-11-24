@@ -14,15 +14,22 @@ public sealed record SubmitScreenshot : IRequest<Review>
     public string? ImageBase64 { get; init; }
     public string? ReviewId { get; init; }
     public string? Source { get; init; }
+
+    /// <summary>Id or name of the project the review belongs to.</summary>
+    public string? Project { get; init; }
 }
 
-internal sealed class SubmitScreenshotHandler(IReviewStore store, TimeProvider clock) : IRequestHandler<SubmitScreenshot, Review>
+internal sealed class SubmitScreenshotHandler(IReviewStore store, IProjectStore projects, TimeProvider clock) : IRequestHandler<SubmitScreenshot, Review>
 {
     public async Task<Review> HandleAsync(SubmitScreenshot request, CancellationToken cancellationToken)
     {
         var image = await ReadImageAsync(request, cancellationToken);
         var extension = ImageInspector.DetectExtension(image)
             ?? throw new RequestException("The image is not a PNG, JPEG, GIF, BMP or WebP file.");
+
+        var project = string.IsNullOrWhiteSpace(request.Project)
+            ? null
+            : await projects.RequireAsync(request.Project, cancellationToken);
 
         var now = clock.GetUtcNow();
         var description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim();
@@ -40,6 +47,7 @@ internal sealed class SubmitScreenshotHandler(IReviewStore store, TimeProvider c
             return await store.UpdateAsync(id, review => review with
             {
                 Title = string.IsNullOrWhiteSpace(request.Title) ? review.Title : request.Title.Trim(),
+                ProjectId = project?.Id ?? review.ProjectId,
                 Status = ReviewStatus.Pending,
                 UpdatedAt = now,
                 Entries = [.. review.Entries, Screenshot(review.RevisionCount + 1, file, description, now)]
@@ -60,6 +68,7 @@ internal sealed class SubmitScreenshotHandler(IReviewStore store, TimeProvider c
             Id = reviewId,
             Title = request.Title.Trim(),
             Source = string.IsNullOrWhiteSpace(request.Source) ? "AI" : request.Source.Trim(),
+            ProjectId = project?.Id,
             Status = ReviewStatus.Pending,
             CreatedAt = now,
             UpdatedAt = now,

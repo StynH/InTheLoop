@@ -9,7 +9,7 @@ using ModelContextProtocol.Server;
 namespace InTheLoop.Mcp;
 
 [McpServerToolType]
-public sealed class ReviewTools(IDispatcher dispatcher, IAppPresence app)
+public sealed class ReviewTools(IRequestDispatcher dispatcher, IAppPresence app)
 {
     public const string Instructions =
         """
@@ -25,6 +25,10 @@ public sealed class ReviewTools(IDispatcher dispatcher, IAppPresence app)
            answer with reply_to_human, or act on it and submit a new revision.
 
         Never assume approval. Only an "approved" status counts.
+
+        Projects keep reviews of different work apart. At the start of a piece of work call create_project
+        with the name of the codebase, app or feature (it returns the existing project when the name is
+        already taken), then pass that name as "project" to submit_screenshot.
         """;
 
     private const int MaxWaitSeconds = 3600;
@@ -40,6 +44,7 @@ public sealed class ReviewTools(IDispatcher dispatcher, IAppPresence app)
         [Description("Absolute path of the image file (PNG, JPEG, GIF, BMP or WebP). Preferred over image_base64.")] string? image_path = null,
         [Description("The image as base64 (a data: URL also works). Use only when you cannot write a file.")] string? image_base64 = null,
         [Description("Id of an existing review to post a new revision to, after the human requested changes.")] string? review_id = null,
+        [Description("Name or id of the project this review belongs to (see create_project). Omit for no project.")] string? project = null,
         [Description("Seconds to wait for the verdict before returning (0-3600). Default 45.")] int wait_seconds = 45,
         CancellationToken cancellationToken = default)
     {
@@ -50,6 +55,7 @@ public sealed class ReviewTools(IDispatcher dispatcher, IAppPresence app)
             ImagePath = image_path,
             ImageBase64 = image_base64,
             ReviewId = review_id,
+            Project = project,
             Source = server.ClientInfo?.Title ?? server.ClientInfo?.Name
         }, cancellationToken));
 
@@ -95,6 +101,36 @@ public sealed class ReviewTools(IDispatcher dispatcher, IAppPresence app)
         return $"Message sent in review {review.Id}. Call wait_for_feedback(review_id=\"{review.Id}\") for the answer.";
     }
 
+    [McpServerTool(Name = "create_project", Title = "Create a project", Idempotent = true)]
+    [Description(
+        "Create a project to group reviews of one codebase, app or feature. Safe to call every session: when a " +
+        "project with this name exists it is returned instead of duplicated. Pass the name as 'project' to submit_screenshot.")]
+    public async Task<string> CreateProject(
+        [Description("Short human-readable name, e.g. 'Webshop redesign'. At most 60 characters.")] string name,
+        [Description("One sentence on what the project is about. Shown to the human.")] string? description = null,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await Run(() => dispatcher.SendAsync(new CreateProject(name, description), cancellationToken));
+        var verb = result.Created ? "Created project" : "Project already exists:";
+        return $"{verb} \"{result.Project.Name}\" (id {result.Project.Id}). " +
+               $"Use project=\"{result.Project.Name}\" in submit_screenshot.";
+    }
+
+    [McpServerTool(Name = "list_projects", Title = "List projects", ReadOnly = true)]
+    [Description("List all projects with how many reviews each has and how many are waiting on the human.")]
+    public async Task<string> ListProjects(CancellationToken cancellationToken = default)
+    {
+        var projects = await Run(() => dispatcher.SendAsync(new ListProjects(), cancellationToken));
+        if (projects.Count == 0)
+        {
+            return "No projects yet. Call create_project to make one.";
+        }
+
+        return string.Join('\n', projects.Select(p =>
+            $"{p.Project.Id} | \"{p.Project.Name}\" | {p.Reviews} reviews, {p.AwaitingHuman} waiting on human" +
+            (p.Project.Description is { } description ? $" | {description}" : "")));
+    }
+
     [McpServerTool(Name = "get_review", Title = "Get a review", ReadOnly = true)]
     [Description("Get the current status and the full conversation of one review, without waiting.")]
     public async Task<string> GetReview(
@@ -107,7 +143,7 @@ public sealed class ReviewTools(IDispatcher dispatcher, IAppPresence app)
         var lines = new List<string>
         {
             $"Review {review.Id}: \"{review.Title}\"",
-            $"Status: {StatusName(review.Status)} | Revisions: {review.RevisionCount} | Waiting on: {(review.AwaitingHuman ? "human" : "you")}",
+            $"Status: {StatusName(review.Status)} | Revisions: {review.RevisionCount} | Waiting on: {WaitingOn(review)}",
             "",
             "Conversation:"
         };
@@ -119,6 +155,7 @@ public sealed class ReviewTools(IDispatcher dispatcher, IAppPresence app)
     [Description("List reviews, newest first. Useful to find a review_id again after losing context.")]
     public async Task<string> ListReviews(
         [Description("Only reviews with this status: 'pending', 'approved' or 'changes_requested'. Omit for all.")] string? status = null,
+        [Description("Only reviews in this project (name or id). Omit for all projects.")] string? project = null,
         CancellationToken cancellationToken = default)
     {
         ReviewStatus? filter = status?.Trim().ToLowerInvariant() switch
@@ -130,15 +167,18 @@ public sealed class ReviewTools(IDispatcher dispatcher, IAppPresence app)
             _ => throw new McpException("status must be 'pending', 'approved' or 'changes_requested'.")
         };
 
-        var reviews = await Run(() => dispatcher.SendAsync(new ListReviews(filter), cancellationToken));
+        var reviews = await Run(() => dispatcher.SendAsync(new ListReviews(filter, project), cancellationToken));
         if (reviews.Count == 0)
         {
             return "No reviews found.";
         }
 
         return string.Join('\n', reviews.Take(50).Select(r =>
-            $"{r.Id} | {StatusName(r.Status)} | revision {r.RevisionCount} | waiting on {(r.AwaitingHuman ? "human" : "you")} | \"{r.Title}\""));
+            $"{r.Id} | {StatusName(r.Status)} | revision {r.RevisionCount} | waiting on {WaitingOn(r)} | \"{r.Title}\""));
     }
+
+    private static string WaitingOn(Review review) =>
+        review.AwaitingHuman ? "human" : review.Status == ReviewStatus.Approved ? "nobody" : "you";
 
     private static TimeSpan Seconds(int seconds) => TimeSpan.FromSeconds(Math.Clamp(seconds, 0, MaxWaitSeconds));
 

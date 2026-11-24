@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>InTheLoop.App</RootNamespace>
+    <AssemblyName>InTheLoop</AssemblyName>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+
+    <ApplicationTitle>In The Loop</ApplicationTitle>
+    <ApplicationId>com.stynh.intheloop</ApplicationId>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+
+    <WindowsPackageType>None</WindowsPackageType>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#7C5CFF" />
+    <MauiImage Include="Resources\Images\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\InTheLoop.Core\InTheLoop.Core.csproj" />
+    <!-- Built alongside the app so the MCP server can be shipped in its "mcp" folder. -->
+    <ProjectReference Include="..\InTheLoop.Mcp\InTheLoop.Mcp.csproj"
+                      ReferenceOutputAssembly="false"
+                      SkipGetTargetFrameworkProperties="true"
+                      SetTargetFramework="TargetFramework=net10.0"
+                      Private="false" />
+  </ItemGroup>
+
+  <Target Name="CopyMcpServer" AfterTargets="Build">
+    <ItemGroup>
+      <McpServerFiles Include="..\InTheLoop.Mcp\bin\$(Configuration)\net10.0\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(McpServerFiles)" DestinationFolder="$(OutDir)mcp\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="PublishMcpServer" AfterTargets="Publish">
+    <ItemGroup>
+      <McpPublishFiles Include="..\InTheLoop.Mcp\bin\$(Configuration)\net10.0\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(McpPublishFiles)" DestinationFolder="$(PublishDir)mcp\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

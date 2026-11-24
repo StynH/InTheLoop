@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Surfaces, darkest to lightest -->
+    <Color x:Key="Canvas">#0E0F14</Color>
+    <Color x:Key="Stage">#090A0E</Color>
+    <Color x:Key="Surface">#16171E</Color>
+    <Color x:Key="SurfaceRaised">#1E2029</Color>
+    <Color x:Key="SurfaceHover">#262936</Color>
+    <Color x:Key="Stroke">#2B2E3B</Color>
+
+    <!-- Text -->
+    <Color x:Key="Text">#F3F4F8</Color>
+    <Color x:Key="TextMuted">#A2A6B8</Color>
+    <Color x:Key="TextFaint">#6E7286</Color>
+
+    <!-- Violet: the human's turn, primary actions -->
+    <Color x:Key="Accent">#7C5CFF</Color>
+    <Color x:Key="AccentHover">#8E72FF</Color>
+    <Color x:Key="AccentPressed">#6A4BEA</Color>
+    <Color x:Key="AccentSoft">#261F4D</Color>
+    <Color x:Key="AccentText">#BBADFF</Color>
+
+    <!-- Green: approved -->
+    <Color x:Key="Success">#34D399</Color>
+    <Color x:Key="SuccessHover">#4FE0AC</Color>
+    <Color x:Key="SuccessPressed">#27B983</Color>
+    <Color x:Key="SuccessSoft">#12302A</Color>
+    <Color x:Key="OnSuccess">#062018</Color>
+
+    <!-- Amber: with the AI, changes requested -->
+    <Color x:Key="Warning">#FFB454</Color>
+    <Color x:Key="WarningSoft">#38290F</Color>
+    <Color x:Key="WarningSoftHover">#4A3614</Color>
+
+    <Color x:Key="Danger">#FF6B6B</Color>
+    <Color x:Key="DangerSoft">#3A1A1E</Color>
+
+    <LinearGradientBrush x:Key="AccentGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="#9A7BFF" />
+        <GradientStop Offset="1" Color="#5B3DF0" />
+    </LinearGradientBrush>
+
+</ResourceDictionary>

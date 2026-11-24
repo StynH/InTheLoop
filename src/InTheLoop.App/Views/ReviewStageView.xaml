@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:InTheLoop.App.ViewModels"
+             x:Class="InTheLoop.App.Views.ReviewStageView"
+             x:DataType="vm:ReviewDetailViewModel">
+
+    <Border Style="{StaticResource Panel}">
+        <Grid RowDefinitions="Auto,*,Auto" Padding="20">
+
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding Title}"
+                           Style="{StaticResource Title}"
+                           LineBreakMode="TailTruncation"
+                           MaxLines="1"
+                           AutomationId="ReviewTitle" />
+                    <HorizontalStackLayout Spacing="8">
+                        <Border Style="{StaticResource Chip}"
+                                BackgroundColor="{Binding Stage, Converter={StaticResource StageColor}, ConverterParameter=Soft}">
+                            <Label Text="{Binding StatusLabel}"
+                                   FontSize="12"
+                                   FontFamily="{StaticResource FontSemibold}"
+                                   TextColor="{Binding Stage, Converter={StaticResource StageColor}}"
+                                   AutomationId="ReviewStatus" />
+                        </Border>
+                        <Border Style="{StaticResource Chip}" IsVisible="{Binding HasProject}">
+                            <Label Text="{Binding ProjectName}" Style="{StaticResource Muted}" FontSize="12" TextColor="{StaticResource Text}" />
+                        </Border>
+                        <Border Style="{StaticResource Chip}">
+                            <Label Text="{Binding Source}" Style="{StaticResource Muted}" FontSize="12" />
+                        </Border>
+                        <Label Text="{Binding RevisionCaption}" Style="{StaticResource Caption}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+
+                <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Start">
+                    <Button Text="&#xE8A7;"
+                            Style="{StaticResource IconButton}"
+                            Command="{Binding OpenImageCommand}"
+                            ToolTipProperties.Text="Open the screenshot at full size" />
+                    <Button Text="&#xE74D;"
+                            Style="{StaticResource IconButton}"
+                            Command="{Binding DeleteCommand}"
+                            AutomationId="DeleteReview"
+                            ToolTipProperties.Text="Delete this review" />
+                </HorizontalStackLayout>
+            </Grid>
+
+            <!-- The screenshot -->
+            <Border Grid.Row="1"
+                    BackgroundColor="{StaticResource Stage}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 16"
+                    Margin="0,16,0,0"
+                    Padding="16">
+                <Grid>
+                    <Image Source="{Binding ImagePath}" Aspect="AspectFit">
+                        <Image.GestureRecognizers>
+                            <TapGestureRecognizer NumberOfTapsRequired="2" Command="{Binding OpenImageCommand}" />
+                        </Image.GestureRecognizers>
+                    </Image>
+                    <Border Style="{StaticResource Chip}"
+                            BackgroundColor="{StaticResource WarningSoft}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Start"
+                            IsVisible="{Binding IsOldRevision}">
+                        <Label Text="You are looking at an older version" FontSize="12" TextColor="{StaticResource Warning}" />
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Versions -->
+            <ScrollView Grid.Row="2"
+                        Orientation="Horizontal"
+                        HorizontalScrollBarVisibility="Never"
+                        Margin="0,14,0,0"
+                        IsVisible="{Binding HasMultipleRevisions}">
+                <HorizontalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding Revisions}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:RevisionViewModel">
+                            <Border BackgroundColor="{StaticResource Stage}"
+                                    Stroke="Transparent"
+                                    StrokeThickness="2"
+                                    StrokeShape="RoundRectangle 12"
+                                    WidthRequest="104"
+                                    HeightRequest="68">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                        <Setter Property="Stroke" Value="{StaticResource Accent}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SelectRevisionCommand, Source={RelativeSource AncestorType={x:Type vm:ReviewDetailViewModel}}, x:DataType=vm:ReviewDetailViewModel}"
+                                                          CommandParameter="{Binding}" />
+                                </Border.GestureRecognizers>
+                                <Grid>
+                                    <Image Source="{Binding ImagePath}" Aspect="AspectFill" />
+                                    <Border Style="{StaticResource Chip}"
+                                            BackgroundColor="#CC0E0F14"
+                                            Padding="7,1"
+                                            Margin="6"
+                                            HorizontalOptions="Start"
+                                            VerticalOptions="End">
+                                        <Label Text="{Binding Label}" FontSize="11" FontFamily="{StaticResource FontSemibold}" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </HorizontalStackLayout>
+            </ScrollView>
+        </Grid>
+    </Border>
+</ContentView>

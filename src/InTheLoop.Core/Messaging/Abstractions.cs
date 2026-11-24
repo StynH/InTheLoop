@@ -9,7 +9,7 @@ public interface IRequestHandler<in TRequest, TResult> where TRequest : IRequest
 }
 
 /// <summary>Routes a request to its handler. View models and MCP tools only ever talk to this.</summary>
-public interface IDispatcher
+public interface IRequestDispatcher
 {
     Task<TResult> SendAsync<TResult>(IRequest<TResult> request, CancellationToken cancellationToken = default);
 }

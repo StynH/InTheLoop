@@ -8,6 +8,8 @@ public sealed class StoreOptions
 
     public string ReviewsDirectory => Path.Combine(DataDirectory, "reviews");
 
+    public string ProjectsDirectory => Path.Combine(DataDirectory, "projects");
+
     public static string DefaultDataDirectory()
     {
         var overridden = Environment.GetEnvironmentVariable(DataDirectoryVariable);
