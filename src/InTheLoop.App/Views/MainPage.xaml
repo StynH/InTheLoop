@@ -7,69 +7,132 @@
              x:DataType="vm:MainViewModel"
              BackgroundColor="{StaticResource Canvas}">
 
-    <Grid ColumnDefinitions="72,*" ColumnSpacing="12" Padding="12">
+    <Grid ColumnDefinitions="236,*" ColumnSpacing="12" Padding="12">
 
-        <!-- Navigation rail -->
+        <!-- Sidebar: projects on top, app-level destinations at the bottom -->
         <Border Style="{StaticResource Panel}">
-            <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10" Padding="0,14">
+            <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="12,16,12,12">
 
-                <Border Background="{StaticResource AccentGradient}"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 14"
-                        WidthRequest="44"
-                        HeightRequest="44"
-                        HorizontalOptions="Center"
-                        Margin="0,0,0,10">
-                    <Label Text="&#xE73E;" Style="{StaticResource Glyph}" TextColor="White" FontSize="18" />
-                </Border>
+                <HorizontalStackLayout Spacing="12" Padding="6,0,0,18">
+                    <Border Background="{StaticResource AccentGradient}"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 12"
+                            WidthRequest="38"
+                            HeightRequest="38">
+                        <Label Text="&#xE73E;" Style="{StaticResource Glyph}" TextColor="White" FontSize="16" />
+                    </Border>
+                    <Label Text="In The Loop" Style="{StaticResource Heading}" FontSize="16" VerticalOptions="Center" />
+                </HorizontalStackLayout>
 
-                <VerticalStackLayout Grid.Row="1" Spacing="8">
-                    <Button Text="&#xE8B9;"
-                            Command="{Binding ShowReviewsCommand}"
-                            AutomationId="NavReviews"
-                            ToolTipProperties.Text="Reviews">
-                        <Button.Triggers>
-                            <DataTrigger TargetType="Button" Binding="{Binding IsReviewsSection}" Value="True">
-                                <Setter Property="Style" Value="{StaticResource RailButtonActive}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Button" Binding="{Binding IsReviewsSection}" Value="False">
-                                <Setter Property="Style" Value="{StaticResource RailButton}" />
-                            </DataTrigger>
-                        </Button.Triggers>
-                    </Button>
-                    <Button Text="&#xE71B;"
-                            Command="{Binding ShowConnectCommand}"
-                            AutomationId="NavConnect"
-                            ToolTipProperties.Text="Connect an AI">
-                        <Button.Triggers>
-                            <DataTrigger TargetType="Button" Binding="{Binding IsConnectSection}" Value="True">
-                                <Setter Property="Style" Value="{StaticResource RailButtonActive}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Button" Binding="{Binding IsConnectSection}" Value="False">
-                                <Setter Property="Style" Value="{StaticResource RailButton}" />
-                            </DataTrigger>
-                        </Button.Triggers>
-                    </Button>
+                <Label Grid.Row="1" Text="PROJECTS" Style="{StaticResource Caption}" FontSize="11" CharacterSpacing="1" Margin="10,0,0,8" />
+
+                <ScrollView Grid.Row="2" VerticalScrollBarVisibility="Default">
+                    <VerticalStackLayout Spacing="4">
+                        <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding Projects}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ProjectChipViewModel">
+                                    <Grid>
+                                        <Button Command="{Binding SelectProjectCommand, Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, x:DataType=vm:MainViewModel}"
+                                                CommandParameter="{Binding}"
+                                                AutomationId="{Binding Name, StringFormat='Project:{0}'}"
+                                                SemanticProperties.Description="{Binding Name}"
+                                                ToolTipProperties.Text="{Binding Description}">
+                                            <Button.Triggers>
+                                                <DataTrigger TargetType="Button" Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="Style" Value="{StaticResource SidebarItemActive}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Button" Binding="{Binding IsSelected}" Value="False">
+                                                    <Setter Property="Style" Value="{StaticResource SidebarItem}" />
+                                                </DataTrigger>
+                                            </Button.Triggers>
+                                        </Button>
+                                        <Grid ColumnDefinitions="20,*,Auto" ColumnSpacing="10" Padding="10,0" InputTransparent="True">
+                                            <Label Text="{Binding Glyph}" Style="{StaticResource Glyph}" FontSize="14">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter Property="TextColor" Value="{StaticResource AccentText}" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                            <Label Grid.Column="1" Text="{Binding Name}" Style="{StaticResource SidebarText}">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter Property="TextColor" Value="{StaticResource Text}" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                            <Border Grid.Column="2"
+                                                    BackgroundColor="{StaticResource Accent}"
+                                                    StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 999"
+                                                    Padding="6,0"
+                                                    MinimumWidthRequest="20"
+                                                    HeightRequest="20"
+                                                    VerticalOptions="Center"
+                                                    IsVisible="{Binding HasBadge}">
+                                                <Label Text="{Binding YourTurnCount}"
+                                                       FontSize="11"
+                                                       FontFamily="{StaticResource FontSemibold}"
+                                                       TextColor="White"
+                                                       HorizontalTextAlignment="Center"
+                                                       VerticalTextAlignment="Center" />
+                                            </Border>
+                                        </Grid>
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <Label Text="Your AI makes projects itself, one per codebase or feature. They show up here."
+                               Style="{StaticResource Caption}"
+                               Margin="10,10,10,0"
+                               IsVisible="{Binding HasNoProjects}" />
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <VerticalStackLayout Grid.Row="3" Spacing="4" Padding="0,12,0,0">
+                    <Grid>
+                        <Button Command="{Binding ShowConnectCommand}"
+                                AutomationId="NavConnect"
+                                SemanticProperties.Description="Connect an AI">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsConnectSection}" Value="True">
+                                    <Setter Property="Style" Value="{StaticResource SidebarItemActive}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsConnectSection}" Value="False">
+                                    <Setter Property="Style" Value="{StaticResource SidebarItem}" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Grid ColumnDefinitions="20,*" ColumnSpacing="10" Padding="10,0" InputTransparent="True">
+                            <Label Text="&#xE71B;" Style="{StaticResource Glyph}" FontSize="14" />
+                            <Label Grid.Column="1" Text="Connect an AI" Style="{StaticResource SidebarText}" />
+                        </Grid>
+                    </Grid>
+                    <Grid>
+                        <Button Style="{StaticResource SidebarItem}"
+                                Command="{Binding OpenDataFolderCommand}"
+                                SemanticProperties.Description="Open data folder"
+                                ToolTipProperties.Text="Open the folder where reviews and projects are stored" />
+                        <Grid ColumnDefinitions="20,*" ColumnSpacing="10" Padding="10,0" InputTransparent="True">
+                            <Label Text="&#xE8B7;" Style="{StaticResource Glyph}" FontSize="14" />
+                            <Label Grid.Column="1" Text="Data folder" Style="{StaticResource SidebarText}" />
+                        </Grid>
+                    </Grid>
                 </VerticalStackLayout>
-
-                <Button Grid.Row="3"
-                        Text="&#xE838;"
-                        Style="{StaticResource RailButton}"
-                        Command="{Binding OpenDataFolderCommand}"
-                        ToolTipProperties.Text="Open the folder where reviews are stored" />
             </Grid>
         </Border>
 
         <!-- Reviews -->
         <Grid Grid.Column="1"
-              ColumnDefinitions="330,*"
+              ColumnDefinitions="320,*"
               ColumnSpacing="12"
               IsVisible="{Binding IsReviewsSection}">
 
             <views:ReviewListView />
 
             <Grid Grid.Column="1"
-                  ColumnDefinitions="*,370"
+                  ColumnDefinitions="*,360"
                   ColumnSpacing="12"
                   IsVisible="{Binding HasSelection}">
                 <views:ReviewStageView BindingContext="{Binding Detail}" />

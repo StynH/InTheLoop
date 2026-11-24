@@ -37,6 +37,7 @@
                       ReferenceOutputAssembly="false"
                       SkipGetTargetFrameworkProperties="true"
                       SetTargetFramework="TargetFramework=net10.0"
+                      GlobalPropertiesToRemove="RuntimeIdentifier;SelfContained;PublishDir;WindowsPackageType;WindowsAppSDKSelfContained"
                       Private="false" />
   </ItemGroup>
 

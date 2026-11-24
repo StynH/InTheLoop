@@ -6,65 +6,15 @@
              x:DataType="vm:MainViewModel">
 
     <Border Style="{StaticResource Panel}">
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" RowSpacing="16" Padding="0,22,0,0">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="16" Padding="0,22,0,0">
 
             <VerticalStackLayout Spacing="4" Padding="20,0">
                 <Label Text="{Binding Greeting}" Style="{StaticResource Title}" />
                 <Label Text="{Binding Summary}" Style="{StaticResource Muted}" />
             </VerticalStackLayout>
 
-            <!-- Project switcher -->
-            <FlexLayout Grid.Row="1"
-                        Wrap="Wrap"
-                        Direction="Row"
-                        AlignItems="Start"
-                        Margin="16,0,16,-8"
-                        IsVisible="{Binding HasProjects}"
-                        BindableLayout.ItemsSource="{Binding Projects}">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="vm:ProjectChipViewModel">
-                        <Border BackgroundColor="{StaticResource SurfaceRaised}"
-                                StrokeThickness="0"
-                                StrokeShape="RoundRectangle 999"
-                                Padding="12,6"
-                                Margin="4,0,4,8"
-                                AutomationId="{Binding Name, StringFormat='Project:{0}'}"
-                                ToolTipProperties.Text="{Binding Description}">
-                            <Border.Triggers>
-                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                    <Setter Property="BackgroundColor" Value="{StaticResource Accent}" />
-                                </DataTrigger>
-                            </Border.Triggers>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding SelectProjectCommand, Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, x:DataType=vm:MainViewModel}"
-                                                      CommandParameter="{Binding}" />
-                            </Border.GestureRecognizers>
-                            <HorizontalStackLayout Spacing="6">
-                                <Label Text="{Binding Name}" FontSize="13" FontFamily="{StaticResource FontSemibold}" TextColor="{StaticResource TextMuted}" VerticalOptions="Center">
-                                    <Label.Triggers>
-                                        <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
-                                            <Setter Property="TextColor" Value="White" />
-                                        </DataTrigger>
-                                    </Label.Triggers>
-                                </Label>
-                                <Border BackgroundColor="{StaticResource AccentSoft}"
-                                        StrokeThickness="0"
-                                        StrokeShape="RoundRectangle 999"
-                                        Padding="6,0"
-                                        MinimumWidthRequest="18"
-                                        HeightRequest="18"
-                                        VerticalOptions="Center"
-                                        IsVisible="{Binding HasBadge}">
-                                    <Label Text="{Binding YourTurnCount}" FontSize="11" FontFamily="{StaticResource FontSemibold}" TextColor="{StaticResource AccentText}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                                </Border>
-                            </HorizontalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </FlexLayout>
-
             <!-- Counters that double as filters -->
-            <Grid Grid.Row="2" ColumnDefinitions="*,*,*" ColumnSpacing="8" Padding="20,0">
+            <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="8" Padding="20,0">
 
                 <Border BackgroundColor="{StaticResource AccentSoft}"
                         Stroke="Transparent"
@@ -136,7 +86,7 @@
             </Grid>
 
             <!-- Search -->
-            <Border Grid.Row="3" Style="{StaticResource Card}" StrokeShape="RoundRectangle 12" Padding="14,0" Margin="20,0" HeightRequest="42">
+            <Border Grid.Row="2" Style="{StaticResource Card}" StrokeShape="RoundRectangle 12" Padding="14,0" Margin="20,0" HeightRequest="42">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                     <Label Text="&#xE721;" Style="{StaticResource Glyph}" FontSize="14" />
                     <Entry Grid.Column="1"
@@ -147,7 +97,7 @@
                 </Grid>
             </Border>
 
-            <Grid Grid.Row="4" ColumnDefinitions="*,Auto" Margin="20,0,14,0" HeightRequest="28">
+            <Grid Grid.Row="3" ColumnDefinitions="*,Auto" Margin="20,0,14,0" HeightRequest="28">
                 <Label Text="{Binding ListTitle}" Style="{StaticResource Caption}" VerticalOptions="Center" LineBreakMode="TailTruncation" MaxLines="1" />
                 <Button Grid.Column="1"
                         Text="&#xE74D;"
@@ -162,7 +112,7 @@
                         ToolTipProperties.Text="Delete this project (its reviews are kept)" />
             </Grid>
 
-            <CollectionView Grid.Row="5"
+            <CollectionView Grid.Row="4"
                             ItemsSource="{Binding Reviews}"
                             SelectionMode="None"
                             Margin="10,-8,10,0"
@@ -232,7 +182,7 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <Label Grid.Row="5"
+            <Label Grid.Row="4"
                    Text="{Binding EmptyListText}"
                    Style="{StaticResource Muted}"
                    IsVisible="{Binding IsListEmpty}"

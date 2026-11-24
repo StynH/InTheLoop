@@ -59,7 +59,7 @@ public partial class MainViewModel : ObservableObject
 
         Detail.Deleted += (_, id) => Apply(id, null);
         Greeting = GreetingFor(clock.GetLocalNow().Hour);
-        SelectedProject = new ProjectChipViewModel(ProjectChipViewModel.AllKey, "All", null, "Every review") { IsSelected = true };
+        SelectedProject = new ProjectChipViewModel(ProjectChipViewModel.AllKey, "All reviews", null, "Every review, across all projects") { IsSelected = true };
         Projects.Add(SelectedProject);
     }
 
@@ -101,7 +101,10 @@ public partial class MainViewModel : ObservableObject
     public partial ProjectChipViewModel SelectedProject { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoProjects))]
     public partial bool HasProjects { get; set; }
+
+    public bool HasNoProjects => !HasProjects;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSelection), nameof(HasNoSelection))]
@@ -171,11 +174,12 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void SelectProject(ProjectChipViewModel chip)
     {
-        if (chip == SelectedProject)
+        if (chip == SelectedProject && IsReviewsSection)
         {
             return;
         }
 
+        IsReviewsSection = true;
         SelectedProject.IsSelected = false;
         chip.IsSelected = true;
         SelectedProject = chip;
@@ -223,6 +227,9 @@ public partial class MainViewModel : ObservableObject
     private void OpenDataFolder() => _shell.OpenFolder(_options.DataDirectory);
 
     partial void OnFilterChanged(ReviewFilter value) => Rebuild();
+
+    // The sidebar highlights either the open project or the Connect page, never both.
+    partial void OnIsReviewsSectionChanged(bool value) => SelectedProject.IsSelected = value;
 
     partial void OnSearchTextChanged(string value) => Rebuild();
 
@@ -411,7 +418,7 @@ public partial class MainViewModel : ObservableObject
         {
             SelectedProject.IsSelected = false;
             SelectedProject = Projects[0];
-            SelectedProject.IsSelected = true;
+            SelectedProject.IsSelected = IsReviewsSection;
         }
 
         HasProjects = _projects.Count > 0;

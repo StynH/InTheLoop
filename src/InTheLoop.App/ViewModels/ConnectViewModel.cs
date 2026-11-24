@@ -84,6 +84,8 @@ public class ConnectViewModel
         new("submit_screenshot", "Posts a screenshot here and waits for your verdict."),
         new("wait_for_feedback", "Keeps waiting when you need more time to decide."),
         new("reply_to_human", "Answers your question or asks you one."),
+        new("create_project", "Starts a project, so reviews of different work stay apart."),
+        new("list_projects", "Sees which projects exist."),
         new("get_review", "Reads a review's status and conversation."),
         new("list_reviews", "Finds earlier reviews again.")
     ];

@@ -24,9 +24,9 @@ public partial class App : Application
                 ForegroundColor = (Color)Resources["TextMuted"],
                 HeightRequest = 36
             },
-            Width = 1440,
-            Height = 900,
-            MinimumWidth = 1120,
+            Width = 1560,
+            Height = 940,
+            MinimumWidth = 1280,
             MinimumHeight = 700
         };
 }
